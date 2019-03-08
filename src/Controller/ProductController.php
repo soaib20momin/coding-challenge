@@ -28,7 +28,30 @@ class ProductController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $products = $entityManager->getRepository(Product::class)->findAll();
 
-        return new JsonResponse($products);
+        if(!count($products)){
+            $response=array(
+                'code'=>1,
+                'message'=>'No products found!',
+                'error'=>null,
+                'result'=>null
+            );
+            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
+        }
+
+        $encoders = [new XmlEncoder(), new JsonEncoder()];
+        $normalizers = [new ObjectNormalizer()];
+
+        $serializer = new Serializer($normalizers, $encoders);
+        
+        $data = $serializer->serialize($products, 'json');
+        $response=array(
+            'code'=>0,
+            'message'=>'success',
+            'error'=>null,
+            'result'=>json_decode($data)
+        );
+
+        return new JsonResponse($response, 200);
     }
 
 
@@ -66,7 +89,6 @@ class ProductController extends AbstractController
 
         return new Response('Product added successfully with name : '.$product->getName());
     }
-
 
     /**
     * @Route("/product/update", name="product_update")
@@ -126,7 +148,7 @@ class ProductController extends AbstractController
 
         $serializer = new Serializer($normalizers, $encoders);
         
-        $data = $serializer->serialize($product, 'json');;
+        $data = $serializer->serialize($product, 'json');
         $response=array(
             'code'=>0,
             'message'=>'success',
@@ -145,8 +167,26 @@ class ProductController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $product = $entityManager->getRepository(Product::class)->find($id);
+
+        if (empty($product)) {
+   
+            $response=array(
+                'code'=>1,
+                'message'=>'product not found!',
+                'error'=>null,
+                'result'=>null
+            );
+            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
+        }
         $entityManager->remove($product);
         $entityManager->flush();
-        return new Response('Product deleted successfully');
+        
+        $response=array(
+            'code'=>0,
+            'message'=>'success',
+            'error'=>null,
+            'result'=>json_decode($data)
+        );
+        return new JsonResponse($response, 200);
     }
 }
