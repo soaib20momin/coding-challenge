@@ -81,9 +81,6 @@
     "egulias/email-validator": {
         "version": "2.1.7"
     },
-    "friendsofsymfony/user-bundle": {
-        "version": "v2.1.2"
-    },
     "hoa/compiler": {
         "version": "3.17.08.08"
     },
